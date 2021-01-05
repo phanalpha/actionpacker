@@ -1,0 +1,52 @@
+#! /bin/bash
+
+. ~/.phpbrew/bashrc
+
+if [ $# != 1 ]; then
+    phpbrew known
+
+    exit
+fi
+
+brew_pkg_config() {
+    brew info $1 | sed -n 's/.*PKG_CONFIG_PATH="\(.*\)"/\1/p'
+}
+
+phpbrew install -j $(nproc) $1 +bz2 +fpm +pear
+phpbrew use $1
+
+for ext in \
+	ctype \
+	curl \
+	fileinfo \
+	filter \
+	gd \
+	gmp \
+	iconv:libiconv/iconv \
+	intl:icu4c/pkg_config \
+	json \
+	mbstring \
+	opcache \
+	openssl/pkg_config \
+	pcntl \
+	pdo \
+	pdo_pgsql:libpq/pdo-pgsql \
+	posix \
+	readline \
+	soap \
+	zip \
+	zlib; do
+    e=${ext%%/*}
+
+    case ${ext} in
+	*/pkg_config)
+	    PKG_CONFIG_PATH="$(brew_pkg_config ${e##*:})" phpbrew extension install ${e%%:*}
+	    ;;
+	*/*)
+	    phpbrew extension install ${e%%:*} -- --with-${ext##*/}=$(brew --prefix ${e##*:})
+	    ;;
+	*)
+	    phpbrew extension install ${e}
+	    ;;
+    esac
+done
