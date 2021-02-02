@@ -1,5 +1,18 @@
 #! /bin/bash
 
+brew install \
+     autoconf \
+     bzip2 \
+     gmp \
+     libjpeg \
+     libpng \
+     libpq \
+     libxml2 \
+     libzip \
+     oniguruma \
+     pkg-config \
+     zlib
+
 . ~/.phpbrew/bashrc
 
 if [ $# != 1 ]; then
@@ -12,7 +25,7 @@ brew_pkg_config() {
     brew info $1 | sed -n 's/.*PKG_CONFIG_PATH="\(.*\)"/\1/p'
 }
 
-phpbrew install -j $(nproc) $1 +bz2 +fpm +pear
+phpbrew install -j $(sysctl -n hw.ncpu) $1 +bz2 +fpm +pear || exit
 phpbrew use $1
 
 for ext in \
@@ -40,13 +53,13 @@ for ext in \
 
     case ${ext} in
 	*/pkg_config)
-	    PKG_CONFIG_PATH="$(brew_pkg_config ${e##*:})" phpbrew extension install ${e%%:*}
+	    PKG_CONFIG_PATH="$(brew_pkg_config ${e##*:})" phpbrew extension install ${e%%:*} || exit
 	    ;;
 	*/*)
-	    phpbrew extension install ${e%%:*} -- --with-${ext##*/}=$(brew --prefix ${e##*:})
+	    phpbrew extension install ${e%%:*} -- --with-${ext##*/}=$(brew --prefix ${e##*:}) || exit
 	    ;;
 	*)
-	    phpbrew extension install ${e}
+	    phpbrew extension install ${e} || exit
 	    ;;
     esac
 done
