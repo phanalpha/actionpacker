@@ -4,6 +4,8 @@ brew install \
      autoconf \
      bzip2 \
      gmp \
+     icu4c \
+     libiconv \
      libjpeg \
      libpng \
      libpq \
@@ -53,13 +55,13 @@ for ext in \
 
     case ${ext} in
 	*/pkg_config)
-	    PKG_CONFIG_PATH="$(brew_pkg_config ${e##*:})" phpbrew extension install ${e%%:*} || exit
+	    PKG_CONFIG_PATH="$(brew_pkg_config ${e##*:})" phpbrew extension install ${e%%:*}
 	    ;;
 	*/*)
-	    phpbrew extension install ${e%%:*} -- --with-${ext##*/}=$(brew --prefix ${e##*:}) || exit
+	    phpbrew extension install ${e%%:*} -- --with-${ext##*/}=$(brew --prefix ${e##*:})
 	    ;;
 	*)
-	    phpbrew extension install ${e} || exit
+	    phpbrew extension install ${e}
 	    ;;
     esac
 done
