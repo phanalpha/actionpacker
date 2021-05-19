@@ -9,6 +9,7 @@ brew install \
      libjpeg \
      libpng \
      libpq \
+     libsodium \
      libxml2 \
      libzip \
      oniguruma \
@@ -27,7 +28,7 @@ brew_pkg_config() {
     brew info $1 | sed -n 's/.*PKG_CONFIG_PATH="\(.*\)"/\1/p'
 }
 
-phpbrew install -j $(sysctl -n hw.ncpu) $1 +bz2 +fpm +pear || exit
+phpbrew install -j $(sysctl -n hw.ncpu) $1 +bz2 +fpm +pear +sodium || exit
 phpbrew use $1
 
 for ext in \
